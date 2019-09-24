@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -12,12 +13,12 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 
-        $products = Product::latest()->paginate(5);
-        
-        return view('products.index', compact('products'))->with('i', (request()->input('page', 1) - 1) * 5);
+        // == Without DataTables ==
+        $limit_per_page = 5;
+        $products = Product::latest()->paginate($limit_per_page);
+        return view('products.index', compact('products'))->with('i', (request()->input('page', 1) - 1) * $limit_per_page);
     }
 
     /**
@@ -40,10 +41,35 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         //
-        $request->validate([
-            'name' => 'required',
-            'detail' => 'required',
-        ]);
+        // $request->validate([
+        //     'name' => 'required',
+        //     'detail' => 'required',
+        //     'price' => 'required|numeric',
+        // ]);
+
+        // After Validation
+        $validator = Validator::make(
+            $request->all(), 
+            [
+                // Rules
+                'name' => 'required',
+                'detail' => 'required',
+                // 'price' => 'required|numeric',
+            ],
+            [
+                // // Custom Messages
+                // 'name.required' => 'Ruangan Nama perlu diisi',
+                // 'detail.required' => 'Ruangan Butiran perlu diisi',
+                // 'price.required' => 'Ruangan Harga perlu diisi',
+            ],
+        );
+
+        if ($validator->fails()) {
+
+            return redirect('products/create')
+                        ->withErrors($validator)
+                        ->withInput();
+        }
 
         Product::create($request->all());
 

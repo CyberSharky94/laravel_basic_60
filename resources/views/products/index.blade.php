@@ -30,10 +30,10 @@
         @foreach ($products as $product)
         <tr>
             <td>{{ ++$i }}</td>
-            <td>{{ $product->name }}</td>
+            <td class="item_name">{{ $product->name }}</td>
             <td>{{ $product->detail }}</td>
             <td>
-                <form action="{{ route('products.destroy',$product->id) }}" method="POST">
+                <form class="delete_item" action="{{ route('products.destroy',$product->id) }}" method="POST">
 
                     <a class="btn btn-primary" href="{{ route('products.show',$product->id) }}"><i class="fas fa-eye"></i> Show</a>
     
@@ -51,5 +51,18 @@
 
     {!! $products->links() !!}
 </div>
+
+<script>
+    $(document).ready(function(){
+        $(".delete_item").on('submit', function(e){
+
+            var index = $('.delete_item').index(this);
+            var item_name = $(".item_name:eq("+index+")").text();
+            
+            return confirm('Are you sure you want to delete "'+ item_name +'"?');
+
+        });
+    });
+</script>
 
 @endsection
